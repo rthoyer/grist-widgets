@@ -33,6 +33,26 @@
   header .title { flex: 1; text-align: center; }
   header h1 { margin: 0; font-size: 1.2rem; }
   header .meta { color: var(--muted); font-size: 0.9rem; margin-top: 2px; }
+  nav.record-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 8px 20px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+  }
+  nav.record-nav button {
+    border: 1px solid var(--border);
+    background: #f7f8fa;
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  nav.record-nav button:disabled { opacity: 0.4; cursor: default; }
+  nav.record-nav button:not(:disabled):hover { background: #eef0f2; }
+  nav.record-nav .position { color: var(--muted); font-size: 0.85rem; min-width: 48px; text-align: center; }
   #empty {
     padding: 40px 20px;
     text-align: center;
@@ -76,6 +96,12 @@
   </div>
   <img class="logo" src="assets/logo-phare.jpg" alt="Logo programme pHARe">
 </header>
+
+<nav class="record-nav">
+  <button id="prevBtn" onclick="goPrev()">‹ Précédent</button>
+  <span class="position" id="posIndicator"></span>
+  <button id="nextBtn" onclick="goNext()">Suivant ›</button>
+</nav>
 
 <div id="empty">Sélectionnez une ligne dans la table <strong>T2026_2027</strong> pour afficher sa fiche.</div>
 <main id="sheet" style="display:none"></main>
@@ -168,8 +194,38 @@ function render(record) {
   `).join("");
 }
 
+let currentRecords = [];
+let currentId = null;
+
+function currentIndex() {
+  return currentRecords.findIndex(r => r.id === currentId);
+}
+
+function updateNav() {
+  const idx = currentIndex();
+  document.getElementById("prevBtn").disabled = idx <= 0;
+  document.getElementById("nextBtn").disabled = idx === -1 || idx >= currentRecords.length - 1;
+  document.getElementById("posIndicator").textContent =
+    idx === -1 ? "" : `${idx + 1} / ${currentRecords.length}`;
+}
+
+function goPrev() {
+  const idx = currentIndex();
+  if (idx > 0) grist.setCursorPos({ rowId: currentRecords[idx - 1].id });
+}
+
+function goNext() {
+  const idx = currentIndex();
+  if (idx !== -1 && idx < currentRecords.length - 1) grist.setCursorPos({ rowId: currentRecords[idx + 1].id });
+}
+
 grist.ready({ requiredAccess: "read table" });
-grist.onRecord(render);
+grist.onRecords(records => { currentRecords = records; updateNav(); });
+grist.onRecord(record => {
+  currentId = record ? record.id : null;
+  render(record);
+  updateNav();
+});
 </script>
 
 </body>
