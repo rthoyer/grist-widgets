@@ -209,12 +209,14 @@ function badge(value, colorMap) {
 
 function formatValue(colId, value) {
   if (value === null || value === undefined) return "";
-  if (/date/i.test(colId)) console.debug("DATE DEBUG", colId, typeof value, value);
-  if (/date/i.test(colId) && (typeof value === "number" || typeof value === "string")) {
-    const d = typeof value === "number" ? new Date(value * 1000) : new Date(value);
-    if (!isNaN(d.getTime())) {
+  if (/date/i.test(colId)) {
+    const d = value instanceof Date ? value
+      : typeof value === "number" ? new Date(value * 1000)
+      : typeof value === "string" ? new Date(value)
+      : null;
+    if (d && !isNaN(d.getTime())) {
       const pad = n => String(n).padStart(2, "0");
-      return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)}/${d.getUTCFullYear()}`;
+      return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
     }
   }
   if (Array.isArray(value)) return value.filter(v => v !== "L").join(", ");
