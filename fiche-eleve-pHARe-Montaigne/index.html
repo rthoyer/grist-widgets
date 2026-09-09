@@ -179,6 +179,37 @@ function statutBadge(value) {
   return `<span class="statut-badge" style="background:${bg};color:${fg}">${value}</span>`;
 }
 
+// Reference columns hand back the linked row's numeric id, not its label.
+// Build id -> label maps from the linked tables so we can show text instead.
+const REF_LOOKUPS = {};
+
+function buildMap(table, labelFn) {
+  const map = {};
+  table.id.forEach((id, i) => { map[id] = labelFn(table, i); });
+  return map;
+}
+
+async function loadRefLookups() {
+  const [statuts, methodes, ruche, degres, qualites] = await Promise.all([
+    grist.docApi.fetchTable("Data_Statuts"),
+    grist.docApi.fetchTable("Data_Methodes"),
+    grist.docApi.fetchTable("Data_Ruche"),
+    grist.docApi.fetchTable("Data_Degre_inquietude"),
+    grist.docApi.fetchTable("Data_Qualite_Echanges"),
+  ]);
+  REF_LOOKUPS.Statut = buildMap(statuts, (t, i) => t.Statuts[i]);
+  REF_LOOKUPS.Methode = buildMap(methodes, (t, i) => t.Methode[i]);
+  REF_LOOKUPS.Degre_d_inquietude = buildMap(degres, (t, i) => t.Degre_d_inquietude[i]);
+  REF_LOOKUPS.Qualite_des_echanges = buildMap(qualites, (t, i) => t.Qualite_des_echanges[i]);
+  REF_LOOKUPS.Entretien_n_1_mene_par = buildMap(ruche, (t, i) => `${t.Prenom[i]} ${t.Nom[i]}`);
+}
+
+function resolveValue(colId, raw) {
+  const map = REF_LOOKUPS[colId];
+  if (map && typeof raw === "number") return map[raw] ?? "";
+  return raw;
+}
+
 function formatValue(colId, value) {
   if (value === null || value === undefined) return "";
   if (/date/i.test(colId) && typeof value === "number") {
@@ -206,12 +237,15 @@ function render(record) {
   sheet.innerHTML = SECTIONS.map(section => `
     <section>
       <h2>${section.title}</h2>
-      ${section.fields.map(([colId, label]) => `
+      ${section.fields.map(([colId, label]) => {
+        const value = formatValue(colId, resolveValue(colId, record[colId]));
+        return `
         <div class="field">
           <div class="label">${label}</div>
-          <div class="value">${colId === "Statut" ? statutBadge(formatValue(colId, record[colId])) : formatValue(colId, record[colId])}</div>
+          <div class="value">${colId === "Statut" ? statutBadge(value) : value}</div>
         </div>
-      `).join("")}
+      `;
+      }).join("")}
     </section>
   `).join("");
 }
@@ -241,13 +275,18 @@ function goNext() {
   if (idx !== -1 && idx < currentRecords.length - 1) grist.setCursorPos({ rowId: currentRecords[idx + 1].id });
 }
 
-grist.ready({ requiredAccess: "read table" });
+let latestRecord;
+
+grist.ready({ requiredAccess: "full" });
 grist.onRecords(records => { currentRecords = records; updateNav(); });
 grist.onRecord(record => {
   currentId = record ? record.id : null;
+  latestRecord = record;
   render(record);
   updateNav();
 });
+
+loadRefLookups().then(() => render(latestRecord));
 </script>
 
 </body>
