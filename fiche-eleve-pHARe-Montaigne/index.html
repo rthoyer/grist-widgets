@@ -185,6 +185,12 @@ const DEGRE_COLORS = {
   "Très Élevé": { bg: "#c0392b", fg: "#fff" },
 };
 
+const QUALITE_COLORS = {
+  "Difficiles": { bg: "#c0392b", fg: "#fff" },
+  "Bons": { bg: "#f5d33f", fg: "#1f2328" },
+  "Très Bons": { bg: "#5cb85c", fg: "#fff" },
+};
+
 function badge(value, colorMap) {
   if (!value) return "";
   const { bg, fg } = colorMap[value] || { bg: "#c7ccd1", fg: "#1f2328" };
@@ -224,6 +230,7 @@ function render(record) {
           colId === "Statut" ? badge(value, STATUT_COLORS) :
           colId === "Methode" ? badge(value, METHODE_COLORS) :
           colId === "Degre_d_inquietude" ? badge(value, DEGRE_COLORS) :
+          colId === "Qualite_des_echanges" ? badge(value, QUALITE_COLORS) :
           value;
         return `
         <div class="field">
