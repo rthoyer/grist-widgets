@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Fiche élève</title>
+<script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+<style>
+  :root {
+    --border: #dcdfe4;
+    --muted: #6b7280;
+    --accent: #2f6f4f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #1f2328;
+    background: #f7f8fa;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 20px;
+    background: #fff;
+    border-bottom: 2px solid var(--accent);
+  }
+  header img.logo {
+    height: 56px;
+    max-width: 140px;
+    object-fit: contain;
+  }
+  header .title { flex: 1; text-align: center; }
+  header h1 { margin: 0; font-size: 1.2rem; }
+  header .meta { color: var(--muted); font-size: 0.9rem; margin-top: 2px; }
+  #empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--muted);
+  }
+  main { padding: 16px 20px 40px; }
+  section {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 14px;
+    padding: 12px 16px;
+  }
+  section h2 {
+    margin: 0 0 8px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+  .field {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 8px;
+    padding: 4px 0;
+    border-top: 1px solid #eef0f2;
+  }
+  .field:first-of-type { border-top: none; }
+  .field .label { color: var(--muted); font-size: 0.85rem; }
+  .field .value { white-space: pre-wrap; word-break: break-word; }
+  .field .value:empty::after { content: "—"; color: #c7ccd1; }
+</style>
+</head>
+<body>
+
+<header>
+  <img class="logo" src="https://0951921x.index-education.net/pronote/fichierurlpublique/logo.png?param=7DA3DEB97ED4E736E373FCE0BB40DB42EDB8D4D4B4BE550E2856BFBA3EC59091A2729C7220F22E1BA46185A3C0F7D6A2BA33D0FBB3FBFE48CB8BA39823C932253542E75B701481EBD36A5D53CF05F471" alt="Logo du collège">
+  <div class="title">
+    <h1 id="eleveName">Fiche de suivi élève</h1>
+    <div class="meta" id="eleveMeta"></div>
+  </div>
+  <img class="logo" src="https://www.ac-nancy-metz.fr/sites/ac_nancy_metz/files/2024-08/eafc---image-phare-29650.jpg" alt="Logo programme pHARe">
+</header>
+
+<div id="empty">Sélectionnez une ligne dans la table <strong>T2026_2027</strong> pour afficher sa fiche.</div>
+<main id="sheet" style="display:none"></main>
+
+<script>
+const SECTIONS = [
+  { title: "Identité", fields: [
+    ["Prenom_Eleve_Cible", "Élève"],
+    ["Classe", "Classe"],
+    ["Statut", "Statut"],
+    ["Methode", "Méthode"],
+    ["Signaux_faibles", "Signaux faibles"],
+  ]},
+  { title: "Repérage", fields: [
+    ["reperes_par_", "Repéré(e) par"],
+    ["eleve_s_IP", "Élève(s) IP"],
+    ["Nature_du_H", "Nature du harcèlement"],
+    ["Degre_d_inquietude", "Degré d'inquiétude"],
+    ["Qualite_des_echanges", "Qualité des échanges"],
+    ["avec_intentionnalite_de_nuire_a_autrui", "Intentionnalité de nuire à autrui"],
+    ["INFOS", "Infos"],
+  ]},
+  { title: "Entretiens", fields: [
+    ["Entretien_n_1_mene_par", "Entretien n°1 mené par"],
+    ["Entretien_n_1_Date", "Entretien n°1 — date"],
+    ["Entretien_n_2_mene_par", "Entretien n°2 mené par"],
+    ["Entretien_n_2_date", "Entretien n°2 — date"],
+    ["Entretien_n_3_mene_par", "Entretien n°3 mené par"],
+    ["Entretien_n_3_date", "Entretien n°3 — date"],
+    ["Entretien_n_4_mene_par", "Entretien n°4 mené par"],
+    ["Entretien_n_4_date", "Entretien n°4 — date"],
+    ["ENTRETIENS_IP", "Entretiens IP"],
+  ]},
+  { title: "Communication", fields: [
+    ["Appel_aux_responsables_legaux", "Appel aux responsables légaux"],
+    ["communication_aux_equipes_PP", "Communication aux équipes PP"],
+    ["Prenoms_des_eleves_et_classes", "Prénoms des élèves et classes"],
+  ]},
+  { title: "Suivi et actions", fields: [
+    ["SEQUENCES", "Séquence 1"],
+    ["SEQUENCES_2", "Séquence 2"],
+    ["SEQUENCES_3", "Séquence 3"],
+    ["QVAM", "QVAM"],
+    ["Theme_des_TR_", "Thème des TR"],
+    ["TR", "TR 1"],
+    ["TR_2", "TR 2"],
+    ["TR_3", "TR 3"],
+    ["TR_4", "TR 4"],
+    ["Propositions_", "Propositions"],
+    ["Resultats", "Résultats"],
+    ["Aide_Allie_e_s", "Aide allié(e)s"],
+    ["c180_", "c180"],
+  ]},
+];
+
+function formatValue(colId, value) {
+  if (value === null || value === undefined) return "";
+  if (/date/i.test(colId) && typeof value === "number") {
+    return new Date(value * 1000).toLocaleDateString("fr-FR");
+  }
+  if (Array.isArray(value)) return value.filter(v => v !== "L").join(", ");
+  return String(value);
+}
+
+function render(record) {
+  const empty = document.getElementById("empty");
+  const sheet = document.getElementById("sheet");
+  if (!record) {
+    empty.style.display = "block";
+    sheet.style.display = "none";
+    document.getElementById("eleveName").textContent = "Fiche de suivi élève";
+    document.getElementById("eleveMeta").textContent = "";
+    return;
+  }
+  empty.style.display = "none";
+  sheet.style.display = "block";
+  document.getElementById("eleveName").textContent = formatValue("Prenom_Eleve_Cible", record.Prenom_Eleve_Cible) || "Fiche de suivi élève";
+  document.getElementById("eleveMeta").textContent = formatValue("Classe", record.Classe);
+
+  sheet.innerHTML = SECTIONS.map(section => `
+    <section>
+      <h2>${section.title}</h2>
+      ${section.fields.map(([colId, label]) => `
+        <div class="field">
+          <div class="label">${label}</div>
+          <div class="value">${formatValue(colId, record[colId])}</div>
+        </div>
+      `).join("")}
+    </section>
+  `).join("");
+}
+
+grist.ready({ requiredAccess: "read table" });
+grist.onRecord(render);
+</script>
+
+</body>
+</html>
