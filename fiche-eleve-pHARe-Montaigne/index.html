@@ -178,6 +178,13 @@ const METHODE_COLORS = {
   "Palo Alto": { bg: "#6fa3e0", fg: "#fff" },
 };
 
+const DEGRE_COLORS = {
+  "Faible": { bg: "#f5d33f", fg: "#1f2328" },
+  "Moyen": { bg: "#f2a54a", fg: "#1f2328" },
+  "Élevé": { bg: "#e0807a", fg: "#fff" },
+  "Très Élevé": { bg: "#c0392b", fg: "#fff" },
+};
+
 function badge(value, colorMap) {
   if (!value) return "";
   const { bg, fg } = colorMap[value] || { bg: "#c7ccd1", fg: "#1f2328" };
@@ -216,6 +223,7 @@ function render(record) {
         const display =
           colId === "Statut" ? badge(value, STATUT_COLORS) :
           colId === "Methode" ? badge(value, METHODE_COLORS) :
+          colId === "Degre_d_inquietude" ? badge(value, DEGRE_COLORS) :
           value;
         return `
         <div class="field">
