@@ -200,7 +200,9 @@ function badge(value, colorMap) {
 function formatValue(colId, value) {
   if (value === null || value === undefined) return "";
   if (/date/i.test(colId) && typeof value === "number") {
-    return new Date(value * 1000).toLocaleDateString("fr-FR");
+    const d = new Date(value * 1000);
+    const pad = n => String(n).padStart(2, "0");
+    return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)}/${d.getUTCFullYear()}`;
   }
   if (Array.isArray(value)) return value.filter(v => v !== "L").join(", ");
   return String(value);
