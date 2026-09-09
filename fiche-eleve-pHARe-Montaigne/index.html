@@ -91,6 +91,12 @@
     font-size: 0.85rem;
     font-weight: 600;
   }
+  footer.build-info {
+    text-align: center;
+    padding: 10px;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
 </style>
 </head>
 <body>
@@ -280,6 +286,8 @@ grist.onRecord(record => {
   updateNav();
 });
 </script>
+
+<footer class="build-info">v<span id="version">15</span></footer>
 
 </body>
 </html>
