@@ -84,6 +84,13 @@
   .field .label { color: var(--muted); font-size: 0.85rem; }
   .field .value { white-space: pre-wrap; word-break: break-word; }
   .field .value:empty::after { content: "—"; color: #c7ccd1; }
+  .statut-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
 </style>
 </head>
 <body>
@@ -157,6 +164,21 @@ const SECTIONS = [
   ]},
 ];
 
+const STATUT_COLORS = {
+  "Harcèlement": { bg: "#e0807a", fg: "#fff" },
+  "En cours de traitement": { bg: "#f5d33f", fg: "#1f2328" },
+  "Résolu": { bg: "#3f8f57", fg: "#fff" },
+  "Autres S&R": { bg: "#4a90d9", fg: "#fff" },
+  "Intimidateurs présumés ou harceleurs en posture perverse": { bg: "#9b9b9b", fg: "#fff" },
+  "A traiter rapidement": { bg: "#f2a54a", fg: "#1f2328" },
+};
+
+function statutBadge(value) {
+  if (!value) return "";
+  const { bg, fg } = STATUT_COLORS[value] || { bg: "#c7ccd1", fg: "#1f2328" };
+  return `<span class="statut-badge" style="background:${bg};color:${fg}">${value}</span>`;
+}
+
 function formatValue(colId, value) {
   if (value === null || value === undefined) return "";
   if (/date/i.test(colId) && typeof value === "number") {
@@ -187,7 +209,7 @@ function render(record) {
       ${section.fields.map(([colId, label]) => `
         <div class="field">
           <div class="label">${label}</div>
-          <div class="value">${formatValue(colId, record[colId])}</div>
+          <div class="value">${colId === "Statut" ? statutBadge(formatValue(colId, record[colId])) : formatValue(colId, record[colId])}</div>
         </div>
       `).join("")}
     </section>
