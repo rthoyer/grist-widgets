@@ -173,9 +173,14 @@ const STATUT_COLORS = {
   "A traiter rapidement": { bg: "#f2a54a", fg: "#1f2328" },
 };
 
-function statutBadge(value) {
+const METHODE_COLORS = {
+  "MPP": { bg: "#a78bfa", fg: "#fff" },
+  "Palo Alto": { bg: "#6fa3e0", fg: "#fff" },
+};
+
+function badge(value, colorMap) {
   if (!value) return "";
-  const { bg, fg } = STATUT_COLORS[value] || { bg: "#c7ccd1", fg: "#1f2328" };
+  const { bg, fg } = colorMap[value] || { bg: "#c7ccd1", fg: "#1f2328" };
   return `<span class="statut-badge" style="background:${bg};color:${fg}">${value}</span>`;
 }
 
@@ -206,12 +211,19 @@ function render(record) {
   sheet.innerHTML = SECTIONS.map(section => `
     <section>
       <h2>${section.title}</h2>
-      ${section.fields.map(([colId, label]) => `
+      ${section.fields.map(([colId, label]) => {
+        const value = formatValue(colId, record[colId]);
+        const display =
+          colId === "Statut" ? badge(value, STATUT_COLORS) :
+          colId === "Methode" ? badge(value, METHODE_COLORS) :
+          value;
+        return `
         <div class="field">
           <div class="label">${label}</div>
-          <div class="value">${colId === "Statut" ? statutBadge(formatValue(colId, record[colId])) : formatValue(colId, record[colId])}</div>
+          <div class="value">${display}</div>
         </div>
-      `).join("")}
+      `;
+      }).join("")}
     </section>
   `).join("");
 }
