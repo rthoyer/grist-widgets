@@ -26,7 +26,7 @@ jobs:
       - name: Stamp build version
         run: |
           VERSION=$(git rev-list --count HEAD)
-          sed -i -E "s#(id=\"version\">)[0-9]+(</span>)#\1${VERSION}\2#" fiche-eleve-pHARe-Montaigne/index.html
+          grep -rl 'id="version"' --include=index.html . | xargs sed -i -E "s#(id=\"version\">)[0-9]+(</span>)#\1${VERSION}\2#"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
