@@ -6,41 +6,18 @@
 <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
 <style>
   :root {
-    --border: #e6ddd0;
+    --border: #23201b;
     --muted: #8a7f6f;
     --accent: #b3651a;
-    --accent-light: #fdf1e2;
+    --banner: #f6c453;
+    --paper: #fffefb;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    color: #2a231a;
-    background: #f8f6f2;
-  }
-  header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 14px 20px;
-    background: #fff;
-    border-bottom: 2px solid var(--accent);
-  }
-  header img.logo {
-    height: 56px;
-    max-width: 140px;
-    object-fit: contain;
-  }
-  header .title { flex: 1; }
-  header h1 { margin: 0; font-size: 1.25rem; }
-  header .meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    margin-top: 4px;
-    color: var(--muted);
-    font-size: 0.85rem;
+    color: #23201b;
+    background: #e9e4da;
   }
   nav.record-nav {
     display: flex;
@@ -49,10 +26,10 @@
     gap: 12px;
     padding: 8px 20px;
     background: #fff;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid #d8d0c0;
   }
   nav.record-nav button {
-    border: 1px solid var(--border);
+    border: 1px solid #d8d0c0;
     background: #f8f6f2;
     border-radius: 6px;
     padding: 4px 12px;
@@ -60,137 +37,204 @@
     cursor: pointer;
   }
   nav.record-nav button:disabled { opacity: 0.4; cursor: default; }
-  nav.record-nav button:not(:disabled):hover { background: var(--accent-light); }
+  nav.record-nav button:not(:disabled):hover { background: #f1e6d3; }
   nav.record-nav .position { color: var(--muted); font-size: 0.85rem; min-width: 48px; text-align: center; }
   #empty {
     padding: 40px 20px;
     text-align: center;
     color: var(--muted);
   }
-  main { padding: 16px 20px 40px; max-width: 900px; margin: 0 auto; }
 
-  .coordonnateur {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    margin-bottom: 14px;
-    padding: 10px 16px;
-    font-size: 0.92rem;
-  }
-  .coordonnateur .label {
-    color: var(--muted);
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 2px;
-  }
+  main { padding: 20px; max-width: 900px; margin: 0 auto; }
 
-  section {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    margin-bottom: 14px;
-    overflow: hidden;
+  .sheet-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 4px 4px 16px;
+    position: relative;
   }
-  section h2 {
+  .sheet-header img.logo {
+    height: 70px;
+    width: 70px;
+    object-fit: contain;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #d8d0c0;
+    padding: 4px;
+  }
+  .sheet-header .spacer { width: 70px; flex-shrink: 0; }
+  .sheet-header .title-block { flex: 1; text-align: center; }
+  .sheet-header h1 {
     margin: 0;
-    padding: 8px 16px;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #fff;
-    background: var(--accent);
+    font-size: 1.7rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
   }
-  section .body { padding: 4px 16px 8px; }
-
-  .field {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 8px;
-    padding: 8px 0;
-    border-top: 1px solid #f0ece3;
+  .sheet-header .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 6px;
+    font-size: 0.85rem;
+    color: #4a4136;
   }
-  .field:first-of-type { border-top: none; }
-  .field .label { color: var(--muted); font-size: 0.85rem; }
-  .field .value { white-space: pre-wrap; word-break: break-word; }
-  .field .value:empty::after { content: "—"; color: #cfc6b8; }
-
-  .triples {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0;
-  }
-  .triples .cell {
-    padding: 10px 16px;
-    border-top: 1px solid #f0ece3;
-  }
-  .triples .cell:not(:first-child) { border-left: 1px solid #f0ece3; }
-  .triples .cell .label {
+  .sheet-header .meta-row .annee { font-weight: 700; letter-spacing: 0.03em; }
+  .sheet-header .meta-row .session {
     color: var(--muted);
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    margin-bottom: 4px;
+    padding-left: 10px;
+    border-left: 1px solid #d8d0c0;
   }
-  .triples .cell .value { white-space: pre-wrap; word-break: break-word; }
-  .triples .cell .value:empty::after { content: "—"; color: #cfc6b8; }
-  @media (max-width: 640px) {
-    .triples { grid-template-columns: 1fr; }
-    .triples .cell:not(:first-child) { border-left: none; }
+  .sheet-header .created {
+    position: absolute;
+    top: 0;
+    right: 4px;
+    font-size: 0.72rem;
+    color: var(--muted);
   }
 
-  .budget-row {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 8px;
-    padding: 8px 0;
+  .form-sheet {
+    background: var(--paper);
+    border: 1.5px solid var(--border);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
   }
-  .budget-row .label { color: var(--muted); font-size: 0.85rem; }
-  .budget-amount {
-    font-size: 1.3rem;
+  .form-sheet .row {
+    border-top: 1px solid var(--border);
+    display: grid;
+  }
+  .form-sheet .row:first-child { border-top: none; }
+
+  .f-label {
     font-weight: 700;
+    font-style: italic;
+    font-size: 0.87rem;
+  }
+  .f-label .sub {
+    display: block;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .f-value { white-space: pre-wrap; word-break: break-word; }
+  .f-value:empty::after {
+    content: "……………………………………………………………";
+    color: #cfc6b8;
+    letter-spacing: 1px;
+  }
+
+  .row-top {
+    grid-template-columns: 1fr 220px;
+  }
+  .row-top .intitule {
+    padding: 10px 14px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .row-top .cadre-cell {
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+  }
+  .cadre-opt {
+    color: #a79c8a;
+    font-size: 0.85rem;
+  }
+  .cadre-opt.active {
+    font-weight: 800;
     color: var(--accent);
+    border: 1.5px solid var(--accent);
+    border-radius: 5px;
+    padding: 1px 7px;
+  }
+  .cadre-sep { color: #cfc6b8; margin: 0 2px; }
+
+  .row-inline {
+    padding: 10px 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .row-banner {
+    background: var(--banner);
+    text-align: center;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    padding: 9px;
+    font-size: 0.95rem;
+  }
+
+  .row-triple {
+    grid-template-columns: 1fr 1fr 2fr;
+  }
+  .row-triple .cell {
+    padding: 10px 14px;
+    border-right: 1px solid var(--border);
+  }
+  .row-triple .cell:last-child { border-right: none; }
+  .row-triple .f-value { margin-top: 4px; }
+
+  .row-lv {
+    grid-template-columns: 230px 1fr;
+  }
+  .row-lv .cell.label {
+    padding: 10px 14px;
+    border-right: 1px solid var(--border);
+  }
+  .row-lv .cell.value {
+    padding: 10px 14px;
+  }
+
+  .budget-amount {
+    font-weight: 800;
+    color: var(--accent);
+    font-size: 1.05rem;
+  }
+  .budget-detail-label {
+    margin-top: 8px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-decoration: underline;
   }
   .budget-detail {
-    border-top: 1px solid #f0ece3;
-    padding-top: 8px;
-    margin-top: 4px;
     white-space: pre-wrap;
     word-break: break-word;
+    margin-top: 2px;
   }
-  .budget-detail:empty::after { content: "—"; color: #cfc6b8; }
+  .budget-detail:empty::after {
+    content: "……………………………………………………………";
+    color: #cfc6b8;
+  }
 
-  .cadre-badge, .session-badge {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: 600;
+  @media (max-width: 640px) {
+    .row-top { grid-template-columns: 1fr; }
+    .row-top .intitule { border-right: none; border-bottom: 1px solid var(--border); }
+    .row-triple { grid-template-columns: 1fr; }
+    .row-triple .cell { border-right: none; border-top: 1px solid #e6ddd0; }
+    .row-triple .cell:first-child { border-top: none; }
+    .row-lv { grid-template-columns: 1fr; }
+    .row-lv .cell.label { border-right: none; border-bottom: 1px solid #e6ddd0; }
   }
-  .cadre-badge { background: var(--accent-light); color: var(--accent); }
-  .session-badge { background: #eef2f6; color: #3b5878; }
 
   footer.build-info {
     text-align: center;
-    padding: 10px;
+    padding: 14px;
     color: var(--muted);
     font-size: 0.75rem;
   }
-  footer.build-info a {
-    color: inherit;
-    text-decoration: none;
-  }
+  footer.build-info a { color: inherit; text-decoration: none; }
 </style>
 </head>
 <body>
-
-<header>
-  <img class="logo" src="assets/logo-college.jpg" alt="Logo du collège">
-  <div class="title">
-    <h1 id="projetName">Fiche projet — École ouverte</h1>
-    <div class="meta" id="projetMeta"></div>
-  </div>
-</header>
 
 <nav class="record-nav">
   <button id="prevBtn" onclick="goPrev()">‹ Précédent</button>
@@ -199,37 +243,101 @@
 </nav>
 
 <div id="empty">Sélectionnez une ligne dans la table <strong>Projets</strong> pour afficher sa fiche.</div>
-<main id="sheet" style="display:none"></main>
+
+<main id="sheet" style="display:none">
+  <div class="sheet-header">
+    <img class="logo" src="assets/logo-college.jpg" alt="Logo du collège">
+    <div class="title-block">
+      <h1>FICHE PROJET</h1>
+      <div class="meta-row">
+        <span class="annee" id="anneeScolaire"></span>
+        <span class="session" id="sessionInfo" style="display:none"></span>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="created" id="createdInfo"></div>
+  </div>
+
+  <div class="form-sheet">
+    <div class="row row-top">
+      <div class="intitule">
+        <span class="f-label">Intitulé de l'action</span>
+        <span class="f-value" id="intitule"></span>
+      </div>
+      <div class="cadre-cell">
+        <div class="f-label" style="font-size:0.78rem;">Cadre de l'action</div>
+        <div id="cadre"></div>
+      </div>
+    </div>
+
+    <div class="row row-inline">
+      <span class="f-label">Coordonnateur(s) de l'action</span>
+      <span class="f-value" id="coordonnateur"></span>
+    </div>
+
+    <div class="row row-banner">DESCRIPTION DE L'ACTION / DU PROJET</div>
+
+    <div class="row row-triple">
+      <div class="cell">
+        <div class="f-label">Classe/s concernée/s</div>
+        <div class="f-value" id="classes"></div>
+      </div>
+      <div class="cell">
+        <div class="f-label">Effectif élèves</div>
+        <div class="f-value" id="effectif"></div>
+      </div>
+      <div class="cell">
+        <div class="f-label">Encadrant/s</div>
+        <div class="f-value" id="encadrants"></div>
+      </div>
+    </div>
+
+    <div class="row row-lv">
+      <div class="cell label"><div class="f-label">Lien avec le Projet d'établissement</div></div>
+      <div class="cell value f-value" id="lien"></div>
+    </div>
+
+    <div class="row row-lv">
+      <div class="cell label"><div class="f-label">Parcours éducatifs travaillés</div></div>
+      <div class="cell value f-value" id="parcours"></div>
+    </div>
+
+    <div class="row row-lv">
+      <div class="cell label"><div class="f-label">Modalités<span class="sub">(Organisation, contenus, partenaires éventuels)</span></div></div>
+      <div class="cell value f-value" id="modalites"></div>
+    </div>
+
+    <div class="row row-lv">
+      <div class="cell label"><div class="f-label">Calendrier / Échéancier</div></div>
+      <div class="cell value f-value" id="calendrier"></div>
+    </div>
+
+    <div class="row row-lv">
+      <div class="cell label"><div class="f-label">Budget prévisionnel<span class="sub">(Titres de transports, billetterie, tarifs intervenants… joindre impérativement devis)</span></div></div>
+      <div class="cell value">
+        <span class="budget-amount" id="budgetMontant"></span>
+        <div class="budget-detail-label">Détails</div>
+        <div class="budget-detail" id="budgetDetail"></div>
+      </div>
+    </div>
+
+    <div class="row row-lv">
+      <div class="cell label"><div class="f-label">Besoins matériels<span class="sub">(Salles, équipement ou autre…)</span></div></div>
+      <div class="cell value f-value" id="besoins"></div>
+    </div>
+
+    <div class="row row-lv">
+      <div class="cell label"><div class="f-label">Évaluation et valorisation de l'action</div></div>
+      <div class="cell value f-value" id="evaluation"></div>
+    </div>
+  </div>
+</main>
 
 <script>
-const CADRE_COLORS = {
-  "EPI": { bg: "#fdf1e2", fg: "#b3651a" },
-  "Projet de classe/s": { bg: "#e9e4f7", fg: "#5b3fa6" },
-};
-
-const FIELD_SECTIONS = [
-  { title: "Description de l'action", fields: [
-    ["Lien_avec_le_projet_d_etablissement", "Lien avec le projet d'établissement"],
-    ["Parcours_educatifs_travailles", "Parcours éducatifs travaillés"],
-    ["Modalites", "Modalités (organisation, contenus, partenaires)"],
-    ["Calendrier_Echeancier", "Calendrier / Échéancier"],
-  ]},
-  { title: "Besoins matériels", fields: [
-    ["Besoins_materiels", "Besoins matériels (salles, équipement, autre…)"],
-  ]},
-  { title: "Évaluation et valorisation", fields: [
-    ["Evaluation_et_valorisation_de_l_action", "Évaluation et valorisation de l'action"],
-  ]},
-];
+const CADRE_OPTIONS = ["EPI", "Projet de classe/s"];
 
 let sessionsById = {};
 let sessionsLoaded = false;
-
-function badge(value, colorMap, cls) {
-  if (!value) return "";
-  const { bg, fg } = colorMap[value] || { bg: "#f0ece3", fg: "#5c5344" };
-  return `<span class="${cls}" style="background:${bg};color:${fg}">${value}</span>`;
-}
 
 function formatDateValue(value) {
   const d = value instanceof Date ? value
@@ -257,10 +365,10 @@ function formatCurrency(value) {
   if (value === null || value === undefined || value === "" || value === 0) return "";
   const num = Number(value);
   if (isNaN(num)) return String(value);
-  return num.toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
+  return "Montant global : " + num.toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
 }
 
-function sessionLabel(refId) {
+function sessionYear(refId) {
   if (!refId) return "";
   const s = sessionsById[refId];
   if (!s) return sessionsLoaded ? "" : "…";
@@ -275,84 +383,66 @@ function sessionDetail(refId) {
   return [s.Session, dates].filter(Boolean).join(" · ");
 }
 
+function renderCadre(value) {
+  if (value && !CADRE_OPTIONS.includes(value)) {
+    return `<span class="cadre-opt active">${value}</span>`;
+  }
+  return CADRE_OPTIONS
+    .map(o => `<span class="cadre-opt${o === value ? " active" : ""}">${o}</span>`)
+    .join('<span class="cadre-sep">/</span>');
+}
+
+function set(id, html) {
+  document.getElementById(id).innerHTML = html;
+}
+
 function render(record) {
   const empty = document.getElementById("empty");
   const sheet = document.getElementById("sheet");
   if (!record) {
     empty.style.display = "block";
     sheet.style.display = "none";
-    document.getElementById("projetName").textContent = "Fiche projet — École ouverte";
-    document.getElementById("projetMeta").innerHTML = "";
     return;
   }
   empty.style.display = "none";
   sheet.style.display = "block";
 
-  document.getElementById("projetName").textContent =
-    formatValue("Intitule_de_l_action", record.Intitule_de_l_action) || "Fiche projet — École ouverte";
+  const annee = sessionYear(record.Annee_Scolaire);
+  document.getElementById("anneeScolaire").textContent = annee
+    ? `ANNEE SCOLAIRE ${annee}`
+    : "ANNEE SCOLAIRE";
 
-  const metaParts = [];
-  const annee = sessionLabel(record.Annee_Scolaire);
-  if (annee) metaParts.push(`<span class="session-badge">${annee}</span>`);
   const session = sessionDetail(record.Session);
-  if (session) metaParts.push(`<span class="session-badge">${session}</span>`);
-  const cadre = formatValue("Cadre_de_l_action", record.Cadre_de_l_action);
-  if (cadre) metaParts.push(badge(cadre, CADRE_COLORS, "cadre-badge"));
-  document.getElementById("projetMeta").innerHTML = metaParts.join("");
+  const sessionEl = document.getElementById("sessionInfo");
+  if (session) {
+    sessionEl.style.display = "inline";
+    sessionEl.textContent = `Session : ${session}`;
+  } else {
+    sessionEl.style.display = "none";
+  }
 
-  const coordonnateur = formatValue("Coordonnateur_s_de_l_action", record.Coordonnateur_s_de_l_action);
+  const created = formatDateValue(record.Date_de_creation_du_Projet);
+  document.getElementById("createdInfo").textContent = created ? `Créée le ${created}` : "";
 
-  const classes = formatValue("Classe_s_concernee_s_", record.Classe_s_concernee_s_);
-  const effectif = formatValue("Effectif_eleves", record.Effectif_eleves);
-  const encadrants = formatValue("Encadrant_s_", record.Encadrant_s_);
-
-  const montant = formatCurrency(record.Budget_previsionnel_total_);
-  const detail = formatValue("Budget_previsionnel_detail_", record.Budget_previsionnel_detail_);
-
-  sheet.innerHTML = `
-    <div class="coordonnateur">
-      <div class="label">Coordonnateur(s) de l'action</div>
-      <div class="value">${coordonnateur || "—"}</div>
-    </div>
-
-    <section>
-      <h2>Classes, effectif &amp; encadrement</h2>
-      <div class="triples">
-        <div class="cell"><div class="label">Classe(s) concernée(s)</div><div class="value">${classes}</div></div>
-        <div class="cell"><div class="label">Effectif élèves</div><div class="value">${effectif}</div></div>
-        <div class="cell"><div class="label">Encadrant(s)</div><div class="value">${encadrants}</div></div>
-      </div>
-    </section>
-
-    ${FIELD_SECTIONS.map(section => `
-      <section>
-        <h2>${section.title}</h2>
-        <div class="body">
-          ${section.fields.map(([colId, label]) => `
-            <div class="field">
-              <div class="label">${label}</div>
-              <div class="value">${formatValue(colId, record[colId])}</div>
-            </div>
-          `).join("")}
-        </div>
-      </section>
-    `).join("")}
-
-    <section>
-      <h2>Budget prévisionnel</h2>
-      <div class="body">
-        <div class="budget-row">
-          <div class="label">Montant global</div>
-          <div class="budget-amount">${montant || "—"}</div>
-        </div>
-        <div class="budget-detail">${detail}</div>
-      </div>
-    </section>
-  `;
+  set("intitule", formatValue("Intitule_de_l_action", record.Intitule_de_l_action));
+  set("cadre", renderCadre(record.Cadre_de_l_action));
+  set("coordonnateur", formatValue("Coordonnateur_s_de_l_action", record.Coordonnateur_s_de_l_action));
+  set("classes", formatValue("Classe_s_concernee_s_", record.Classe_s_concernee_s_));
+  set("effectif", formatValue("Effectif_eleves", record.Effectif_eleves));
+  set("encadrants", formatValue("Encadrant_s_", record.Encadrant_s_));
+  set("lien", formatValue("Lien_avec_le_projet_d_etablissement", record.Lien_avec_le_projet_d_etablissement));
+  set("parcours", formatValue("Parcours_educatifs_travailles", record.Parcours_educatifs_travailles));
+  set("modalites", formatValue("Modalites", record.Modalites));
+  set("calendrier", formatValue("Calendrier_Echeancier", record.Calendrier_Echeancier));
+  document.getElementById("budgetMontant").textContent = formatCurrency(record.Budget_previsionnel_total_);
+  set("budgetDetail", formatValue("Budget_previsionnel_detail_", record.Budget_previsionnel_detail_));
+  set("besoins", formatValue("Besoins_materiels", record.Besoins_materiels));
+  set("evaluation", formatValue("Evaluation_et_valorisation_de_l_action", record.Evaluation_et_valorisation_de_l_action));
 }
 
 let currentRecords = [];
 let currentId = null;
+let lastRecord = null;
 
 function currentIndex() {
   return currentRecords.findIndex(r => r.id === currentId);
@@ -375,8 +465,6 @@ function goNext() {
   const idx = currentIndex();
   if (idx !== -1 && idx < currentRecords.length - 1) grist.setCursorPos({ rowId: currentRecords[idx + 1].id });
 }
-
-let lastRecord = null;
 
 async function loadSessions() {
   try {
