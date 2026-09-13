@@ -414,7 +414,7 @@ function render(record) {
   empty.style.display = "none";
   sheet.style.display = "block";
 
-  const annee = sessionYear(record.Annee_Scolaire) || sessionYear(record.Session);
+  const annee = sessionYear(record.Session);
   document.getElementById("anneeScolaire").textContent = annee
     ? `ANNEE SCOLAIRE ${annee}`
     : "ANNEE SCOLAIRE";
