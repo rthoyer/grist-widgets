@@ -6,9 +6,7 @@
 <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
 <style>
   :root {
-    --border: #23201b;
-    --muted: #8a7f6f;
-    --accent: #b3651a;
+    --border: #000;
     --banner: #f6c453;
     --paper: #ffffff;
   }
@@ -16,7 +14,7 @@
   body {
     margin: 0;
     font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    color: #23201b;
+    color: #000;
     background: #fff;
   }
   nav.record-nav {
@@ -38,11 +36,11 @@
   }
   nav.record-nav button:disabled { opacity: 0.4; cursor: default; }
   nav.record-nav button:not(:disabled):hover { background: #f1e6d3; }
-  nav.record-nav .position { color: var(--muted); font-size: 0.85rem; min-width: 48px; text-align: center; }
+  nav.record-nav .position { color: #000; font-size: 0.85rem; min-width: 48px; text-align: center; }
   #empty {
     padding: 40px 20px;
     text-align: center;
-    color: var(--muted);
+    color: #000;
   }
 
   main { padding: 20px; max-width: 900px; margin: 0 auto; }
@@ -78,11 +76,11 @@
     gap: 10px;
     margin-top: 6px;
     font-size: 0.85rem;
-    color: #4a4136;
+    color: #000;
   }
   .sheet-header .meta-row .annee { font-weight: 700; letter-spacing: 0.03em; }
   .sheet-header .meta-row .session {
-    color: var(--muted);
+    color: #000;
     padding-left: 10px;
     border-left: 1px solid #d8d0c0;
   }
@@ -91,7 +89,7 @@
     top: 0;
     right: 4px;
     font-size: 0.72rem;
-    color: var(--muted);
+    color: #000;
   }
 
   .form-sheet {
@@ -114,13 +112,13 @@
     font-weight: 400;
     font-style: italic;
     font-size: 0.72rem;
-    color: var(--muted);
+    color: #000;
     margin-top: 2px;
   }
   .f-value { white-space: pre-wrap; word-break: break-word; }
   .f-value:empty::after {
     content: "……………………………………………………………";
-    color: #cfc6b8;
+    color: #000;
     letter-spacing: 1px;
   }
 
@@ -143,17 +141,17 @@
     gap: 6px;
   }
   .cadre-opt {
-    color: #a79c8a;
+    color: #000;
     font-size: 0.85rem;
   }
   .cadre-opt.active {
     font-weight: 800;
-    color: var(--accent);
-    border: 1.5px solid var(--accent);
+    color: #000;
+    border: 1.5px solid #000;
     border-radius: 5px;
     padding: 1px 7px;
   }
-  .cadre-sep { color: #cfc6b8; margin: 0 2px; }
+  .cadre-sep { color: #000; margin: 0 2px; }
 
   .row-inline {
     padding: 10px 14px;
@@ -195,7 +193,7 @@
 
   .budget-amount {
     font-weight: 800;
-    color: var(--accent);
+    color: #000;
     font-size: 1.05rem;
   }
   .budget-detail-label {
@@ -211,7 +209,7 @@
   }
   .budget-detail:empty::after {
     content: "……………………………………………………………";
-    color: #cfc6b8;
+    color: #000;
   }
 
   @media (max-width: 640px) {
@@ -227,7 +225,7 @@
   footer.build-info {
     text-align: center;
     padding: 14px;
-    color: var(--muted);
+    color: #000;
     font-size: 0.75rem;
   }
   footer.build-info a { color: inherit; text-decoration: none; }
