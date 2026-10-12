@@ -64,8 +64,6 @@
     margin: 0;
     padding: 0;
     list-style: none;
-    columns: 2 320px;
-    column-gap: 40px;
   }
   section.meta li {
     position: relative;
@@ -81,6 +79,14 @@
     width: 7px;
     height: 7px;
     background: var(--bleu-france);
+  }
+  section.meta .cat { margin-bottom: 14px; break-inside: avoid; }
+  section.meta .cat:last-child { margin-bottom: 0; }
+  section.meta h3 {
+    margin: 0 0 4px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--texte);
   }
   section.meta .none { color: var(--texte-doux); font-style: italic; }
 
@@ -122,9 +128,7 @@
 function render(groups) {
   const html = groups.map(g => {
     const eyebrow = g.nom && g.nom !== g.titre ? `<span class="eyebrow">${escapeHtml(g.nom)}</span>` : "";
-    const list = g.besoins.length
-      ? `<ul>${g.besoins.map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>`
-      : `<p class="none">Aucun besoin.</p>`;
+    const list = renderCategories(g, "Aucun besoin.");
     return `<section class="meta"><h2>${eyebrow}${escapeHtml(g.titre)}</h2>${list}</section>`;
   }).join("");
   document.getElementById("groups").innerHTML = html;

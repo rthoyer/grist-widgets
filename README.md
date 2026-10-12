@@ -32,8 +32,9 @@ document (nécessaire pour résoudre les références vers la table `Sessions`).
 
 Liste des besoins du document « Offre data », regroupés par méta-catégorie (tables `Besoin`,
 `Categories`, `Meta_categorie`). Fond blanc, bloc-marque « Gouvernement » en haut à gauche,
-titre = nom du document Grist, police Marianne. Dans chaque méta-catégorie, les besoins suivent
-l'ordre des catégories puis l'ordre des lignes ; les besoins sans catégorie sont listés dans « Autres besoins ».
+titre = nom du document Grist (lu via l'API REST avec un jeton d'accès), police Marianne. Dans chaque
+méta-catégorie, les besoins sont listés sur une colonne et regroupés par catégorie (ordre des tables) ;
+les besoins sans catégorie sont listés dans « Autres besoins ».
 
 **Utilisation dans Grist** : ajouter un widget **Custom URL** pointant vers `offre-data-besoins/index.html`,
 le lier de préférence à la table `Besoin` (il se rafraîchit à chaque modification de cette table), et
@@ -41,8 +42,8 @@ autoriser l'accès complet au document.
 
 ## offre-data-slide
 
-Une « slide » 16:9 par méta-catégorie : bloc-marque en haut à gauche, titre de la méta-catégorie, liste des
-besoins (taille de police et nombre de colonnes ajustés automatiquement pour que tout tienne). La
+Une « slide » 16:9 par méta-catégorie : bloc-marque en haut à gauche, titre de la méta-catégorie, besoins
+regroupés par catégorie sur une colonne (police réduite pour que tout tienne, colonnes seulement en dernier recours). La
 méta-catégorie se choisit dans la liste déroulante, avec les boutons ‹ › ou les flèches du clavier.
 Imprimable (une page au format slide).
 

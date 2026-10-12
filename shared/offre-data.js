@@ -30,38 +30,54 @@ async function loadOffreData() {
   const cats = tableToRows(catT).sort(bySortOrder);
   const metas = tableToRows(metaT).sort(bySortOrder);
 
-  const catsById = new Map(cats.map((c, i) => [c.id, { ...c, order: i }]));
-  const groups = metas.map(m => ({ id: m.id, nom: (m.Nom || "").trim(), titre: metaTitle(m), items: [] }));
+  const groups = metas.map(m => ({ id: m.id, nom: (m.Nom || "").trim(), titre: metaTitle(m), categories: [] }));
   const groupsById = new Map(groups.map(g => [g.id, g]));
-  const orphans = { id: 0, nom: "Autres", titre: "Autres besoins", items: [] };
+  const orphans = { id: 0, nom: "Autres", titre: "Autres besoins", categories: [] };
+  const noCat = { nom: "", besoins: [] };
 
-  besoins.forEach((b, i) => {
+  // Les catégories sont rangées dans leur méta-catégorie, dans l'ordre de la table Categories.
+  const catsById = new Map();
+  cats.forEach(c => {
+    const cat = { nom: (c.Categorie || "").trim(), besoins: [] };
+    catsById.set(c.id, cat);
+    (groupsById.get(c.Meta_Categorie) || orphans).categories.push(cat);
+  });
+
+  besoins.forEach(b => {
     const text = (b.Besoin || "").trim();
-    if (!text) return;
-    const cat = catsById.get(b.Categorie);
-    const group = (cat && groupsById.get(cat.Meta_Categorie)) || orphans;
-    group.items.push({ text, catOrder: cat ? cat.order : Infinity, order: i });
+    if (text) (catsById.get(b.Categorie) || noCat).besoins.push(text);
   });
+  if (noCat.besoins.length) orphans.categories.push(noCat);
 
-  // Dans une méta-catégorie : ordre des catégories, puis ordre des besoins.
-  const all = orphans.items.length ? [...groups, orphans] : groups;
-  all.forEach(g => {
-    g.items.sort((a, b) => (a.catOrder - b.catOrder) || (a.order - b.order));
-    g.besoins = g.items.map(it => it.text);
-    delete g.items;
-  });
-  return all;
+  const all = [...groups, orphans];
+  all.forEach(g => { g.categories = g.categories.filter(c => c.besoins.length); });
+  return all.filter(g => g !== orphans || g.categories.length);
 }
 
+// getDocName() renvoie l'identifiant du document : on lit son nom via l'API REST avec un jeton d'accès.
 async function loadDocName(fallback) {
   try {
-    const name = await grist.docApi.getDocName();
-    return name || fallback;
+    const { token, baseUrl } = await grist.docApi.getAccessToken({ readOnly: true });
+    const resp = await fetch(`${baseUrl}?auth=${encodeURIComponent(token)}`);
+    if (resp.ok) {
+      const doc = await resp.json();
+      if (doc && doc.name) return doc.name;
+    }
   } catch (e) {
-    return fallback;
+    console.warn("Nom du document indisponible :", e);
   }
+  return fallback;
 }
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+// Besoins d'une méta-catégorie, regroupés verticalement par catégorie.
+function renderCategories(group, emptyText) {
+  if (!group.categories.length) return `<p class="none">${escapeHtml(emptyText)}</p>`;
+  return group.categories.map(c =>
+    `<div class="cat">${c.nom ? `<h3>${escapeHtml(c.nom)}</h3>` : ""}` +
+    `<ul>${c.besoins.map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul></div>`
+  ).join("");
 }

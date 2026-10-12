@@ -105,15 +105,23 @@
     margin: 20px 0 28px;
   }
   .slide .content { flex: 1; min-height: 0; overflow: hidden; }
-  .slide ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  .slide .cats {
+    font-size: var(--list-size, 26px);
     column-gap: 56px;
     column-fill: auto;
-    height: 100%;
-    font-size: var(--list-size, 26px);
   }
+  .slide .cats.multi { height: 100%; }
+  .slide .cat { margin-bottom: 0.6em; break-inside: avoid; }
+  .slide .cat:last-child { margin-bottom: 0; }
+  .slide h3 {
+    margin: 0 0 0.15em;
+    font-size: 0.85em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--texte-doux);
+  }
+  .slide ul { margin: 0; padding: 0; list-style: none; }
   .slide li {
     position: relative;
     padding: 0.22em 0 0.22em 1.1em;
@@ -179,17 +187,19 @@ function fitSlide() {
   slide.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
 }
 
-// Choisit le nombre de colonnes et la taille de police pour que toute la liste tienne dans la slide.
+// Une seule colonne, police réduite jusqu'à ce que tout tienne ; plusieurs colonnes seulement en dernier recours.
 function fitList() {
   const content = document.getElementById("content");
-  const ul = content.querySelector("ul");
-  if (!ul) return;
-  const n = ul.children.length;
-  for (const cols of n > 6 ? [2, 3] : [1, 2, 3]) {
-    ul.style.columnCount = cols;
-    for (let size = 28; size >= 14; size -= 1) {
-      ul.style.setProperty("--list-size", size + "px");
-      if (ul.scrollWidth <= content.clientWidth + 1 && ul.scrollHeight <= content.clientHeight + 1) return;
+  const cats = content.querySelector(".cats");
+  if (!cats) return;
+  const fits = () => cats.scrollWidth <= content.clientWidth + 1 &&
+    (cats.classList.contains("multi") ? cats.scrollHeight : cats.offsetHeight) <= content.clientHeight + 1;
+  for (const cols of [1, 2, 3]) {
+    cats.style.columnCount = cols;
+    cats.classList.toggle("multi", cols > 1);
+    for (let size = 26; size >= (cols === 3 ? 12 : 16); size -= 1) {
+      cats.style.setProperty("--list-size", size + "px");
+      if (fits()) return;
     }
   }
 }
@@ -224,9 +234,7 @@ function render() {
   slide.style.display = "flex";
   document.getElementById("eyebrow").textContent = g.nom && g.nom !== g.titre ? g.nom : "";
   document.getElementById("title").textContent = g.titre;
-  document.getElementById("content").innerHTML = g.besoins.length
-    ? `<ul>${g.besoins.map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>`
-    : `<p class="none">Aucun besoin pour cette méta-catégorie.</p>`;
+  document.getElementById("content").innerHTML = `<div class="cats">${renderCategories(g, "Aucun besoin pour cette méta-catégorie.")}</div>`;
 
   document.getElementById("prevBtn").disabled = idx <= 0;
   document.getElementById("nextBtn").disabled = idx >= groups.length - 1;
