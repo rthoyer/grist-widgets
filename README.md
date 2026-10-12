@@ -31,7 +31,7 @@ document (nécessaire pour résoudre les références vers la table `Sessions`).
 ## offre-data-besoins
 
 Liste des besoins du document « Offre data », regroupés par méta-catégorie (tables `Besoin`,
-`Categories`, `Meta_categorie`). Fond blanc, bloc-marque « République Française » en haut à gauche,
+`Categories`, `Meta_categorie`). Fond blanc, bloc-marque « Gouvernement » en haut à gauche,
 titre = nom du document Grist, police Marianne. Dans chaque méta-catégorie, les besoins suivent
 l'ordre des catégories puis l'ordre des lignes ; les besoins sans catégorie sont listés dans « Autres besoins ».
 
