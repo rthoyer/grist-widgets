@@ -32,7 +32,8 @@ document (nécessaire pour résoudre les références vers la table `Sessions`).
 
 Liste des besoins du document « Offre data », regroupés par méta-catégorie (tables `Besoin`,
 `Categories`, `Meta_categorie`). Fond blanc, bloc-marque « Gouvernement » en haut à gauche,
-titre = nom du document Grist (lu via l'API REST avec un jeton d'accès), police Marianne. Dans chaque
+titre = nom du document Grist (si l'API REST l'autorise), police Marianne. Le titre est modifiable :
+double-clic dessus (ou « Ouvrir la configuration » du widget), puis Entrée ; il est stocké dans les options du widget. Dans chaque
 méta-catégorie, les besoins sont listés sur une colonne et regroupés par catégorie (ordre des tables) ;
 les besoins sans catégorie sont listés dans « Autres besoins ».
 

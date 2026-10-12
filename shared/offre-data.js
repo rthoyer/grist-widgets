@@ -54,7 +54,8 @@ async function loadOffreData() {
   return all.filter(g => g !== orphans || g.categories.length);
 }
 
-// getDocName() renvoie l'identifiant du document : on lit son nom via l'API REST avec un jeton d'accès.
+// getDocName() renvoie l'identifiant du document : on tente de lire son nom via l'API REST avec un jeton d'accès
+// (peut être refusé selon le serveur Grist ; le titre reste alors modifiable dans le widget).
 async function loadDocName(fallback) {
   try {
     const { token, baseUrl } = await grist.docApi.getAccessToken({ readOnly: true });
@@ -62,6 +63,8 @@ async function loadDocName(fallback) {
     if (resp.ok) {
       const doc = await resp.json();
       if (doc && doc.name) return doc.name;
+    } else {
+      console.warn("Nom du document indisponible : HTTP", resp.status);
     }
   } catch (e) {
     console.warn("Nom du document indisponible :", e);
