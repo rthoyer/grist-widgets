@@ -39,6 +39,9 @@
     cursor: text;
     outline: none;
   }
+  [data-col] { cursor: text; outline: none; }
+  [data-col]:hover { background: #f0f0ff; }
+  [data-col][contenteditable="true"] { background: none; box-shadow: 0 2px 0 var(--bleu-france); }
   header.brand h1[contenteditable="true"] { box-shadow: 0 2px 0 var(--bleu-france); }
 
   main { padding: 24px 32px 8px; max-width: 1200px; }
@@ -130,9 +133,10 @@
 <script>
 function render(groups) {
   const html = groups.map(g => {
-    const eyebrow = g.nom && g.nom !== g.titre ? `<span class="eyebrow">${escapeHtml(g.nom)}</span>` : "";
+    const eyebrow = g.nom && g.nom !== g.titre
+      ? `<span class="eyebrow"${editAttrs("Meta_categorie", g.id, "Nom")}>${escapeHtml(g.nom)}</span>` : "";
     const list = renderCategories(g, "Aucun besoin.");
-    return `<section class="meta"><h2>${eyebrow}${escapeHtml(g.titre)}</h2>${list}</section>`;
+    return `<section class="meta"><h2>${eyebrow}<span${editAttrs("Meta_categorie", g.id, g.titreCol)}>${escapeHtml(g.titre)}</span></h2>${list}</section>`;
   }).join("");
   document.getElementById("groups").innerHTML = html;
   document.getElementById("status").style.display = groups.length ? "none" : "block";
@@ -194,6 +198,7 @@ titleEl.addEventListener("keydown", e => {
   if (e.key === "Escape") { titleEl.contentEditable = "false"; showTitle(); }
 });
 
+enableInlineEditing(document.getElementById("groups"), scheduleReload);
 grist.ready({ requiredAccess: "full", onEditOptions: editTitle });
 grist.onOptions(options => {
   customTitle = (options && options.titre) || null;

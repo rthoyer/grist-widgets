@@ -51,6 +51,9 @@ Imprimable (une page au format slide).
 **Utilisation dans Grist** : widget **Custom URL** vers `offre-data-slide/index.html`, accès complet au
 document. S'il est lié à la table `Meta_categorie`, la slide suit la ligne sélectionnée.
 
+**Édition en place** (les deux widgets) : double-clic sur un texte (titre ou nom de méta-catégorie, catégorie,
+besoin), puis Entrée pour enregistrer directement dans la table Grist correspondante, Échap pour annuler.
+
 Les deux widgets partagent `shared/` : la police Marianne et le bloc-marque extraits du
 [DSFR](https://github.com/GouvernementFR/dsfr) (`shared/dsfr/`), et le chargement des données (`shared/offre-data.js`).
 

@@ -139,6 +139,11 @@
   }
   .slide .none { font-size: 24px; color: var(--texte-doux); font-style: italic; }
 
+  [data-col] { cursor: text; outline: none; }
+  [data-col]:hover { background: #f0f0ff; }
+  [data-col][contenteditable="true"] { background: none; box-shadow: 0 2px 0 var(--bleu-france); }
+  @media print { [data-col]:hover { background: none; } }
+
   #status { padding: 24px; color: var(--texte-doux); }
 
   @media print {
@@ -232,8 +237,13 @@ function render() {
 
   status.style.display = "none";
   slide.style.display = "flex";
-  document.getElementById("eyebrow").textContent = g.nom && g.nom !== g.titre ? g.nom : "";
-  document.getElementById("title").textContent = g.titre;
+  const eyebrow = document.getElementById("eyebrow");
+  const showNom = g.nom && g.nom !== g.titre;
+  eyebrow.textContent = showNom ? g.nom : "";
+  setEditable(eyebrow, "Meta_categorie", showNom ? g.id : 0, "Nom");
+  const title = document.getElementById("title");
+  title.textContent = g.titre;
+  setEditable(title, "Meta_categorie", g.id, g.titreCol);
   document.getElementById("content").innerHTML = `<div class="cats">${renderCategories(g, "Aucun besoin pour cette méta-catégorie.")}</div>`;
 
   document.getElementById("prevBtn").disabled = idx <= 0;
@@ -253,7 +263,7 @@ document.getElementById("metaSelect").addEventListener("change", e => select(Num
 document.getElementById("prevBtn").addEventListener("click", () => step(-1));
 document.getElementById("nextBtn").addEventListener("click", () => step(1));
 document.addEventListener("keydown", e => {
-  if (e.target.tagName === "SELECT") return;
+  if (e.target.tagName === "SELECT" || e.target.isContentEditable) return;
   if (e.key === "ArrowLeft" || e.key === "PageUp") step(-1);
   if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") step(1);
 });
@@ -279,6 +289,7 @@ async function reload() {
   }
 }
 
+enableInlineEditing(document.getElementById("slide"), scheduleReload);
 grist.ready({ requiredAccess: "full" });
 grist.onRecords(scheduleReload);
 // Lié à la table Meta_categorie, le widget suit la ligne sélectionnée.
