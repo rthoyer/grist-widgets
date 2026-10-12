@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Offre data — besoins</title>
+<script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+<link rel="stylesheet" href="../shared/dsfr/marianne.css">
+<script src="../shared/offre-data.js"></script>
+<style>
+  :root {
+    --bleu-france: #000091;
+    --rouge-marianne: #e1000f;
+    --texte: #161616;
+    --texte-doux: #3a3a3a;
+    --ligne: #dddddd;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: #fff; }
+  body {
+    margin: 0;
+    font-family: "Marianne", Arial, sans-serif;
+    color: var(--texte);
+  }
+
+  header.brand {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding: 20px 32px 18px;
+    border-bottom: 1px solid var(--ligne);
+  }
+  header.brand .fr-logo { flex-shrink: 0; }
+  header.brand h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  main { padding: 24px 32px 8px; max-width: 1200px; }
+
+  #status { color: var(--texte-doux); padding: 24px 0; }
+
+  section.meta { margin-bottom: 28px; break-inside: avoid-page; }
+  section.meta h2 {
+    margin: 0 0 12px;
+    padding-bottom: 6px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--bleu-france);
+    border-bottom: 2px solid var(--bleu-france);
+  }
+  section.meta .eyebrow {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--texte-doux);
+    margin-bottom: 2px;
+  }
+  section.meta ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    columns: 2 320px;
+    column-gap: 40px;
+  }
+  section.meta li {
+    position: relative;
+    padding: 4px 0 4px 18px;
+    line-height: 1.45;
+    break-inside: avoid;
+  }
+  section.meta li::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 0.8em;
+    width: 7px;
+    height: 7px;
+    background: var(--bleu-france);
+  }
+  section.meta .none { color: var(--texte-doux); font-style: italic; }
+
+  footer.build-info {
+    text-align: center;
+    padding: 14px;
+    color: var(--texte-doux);
+    font-size: 0.75rem;
+  }
+  footer.build-info a { color: inherit; text-decoration: none; }
+
+  @media (max-width: 640px) {
+    header.brand { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px; }
+    main { padding: 16px; }
+  }
+
+  @media print {
+    footer.build-info { display: none; }
+    header.brand, main { padding-left: 0; padding-right: 0; }
+    section.meta h2 { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<header class="brand">
+  <p class="fr-logo">République<br>Française</p>
+  <h1 id="docTitle">Offre data</h1>
+</header>
+
+<main>
+  <div id="status">Chargement…</div>
+  <div id="groups"></div>
+</main>
+
+<footer class="build-info"><a href="https://github.com/rthoyer" target="_blank" rel="noopener">@rthoyer</a> — v<span id="version">0</span></footer>
+
+<script>
+function render(groups) {
+  const html = groups.map(g => {
+    const eyebrow = g.nom && g.nom !== g.titre ? `<span class="eyebrow">${escapeHtml(g.nom)}</span>` : "";
+    const list = g.besoins.length
+      ? `<ul>${g.besoins.map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>`
+      : `<p class="none">Aucun besoin.</p>`;
+    return `<section class="meta"><h2>${eyebrow}${escapeHtml(g.titre)}</h2>${list}</section>`;
+  }).join("");
+  document.getElementById("groups").innerHTML = html;
+  document.getElementById("status").style.display = groups.length ? "none" : "block";
+  if (!groups.length) document.getElementById("status").textContent = "Aucune méta-catégorie.";
+}
+
+let reloadTimer = null;
+function scheduleReload() {
+  clearTimeout(reloadTimer);
+  reloadTimer = setTimeout(reload, 150);
+}
+
+async function reload() {
+  try {
+    render(await loadOffreData());
+  } catch (e) {
+    console.error(e);
+    const status = document.getElementById("status");
+    status.style.display = "block";
+    status.textContent = "Impossible de lire les tables Besoin / Categories / Meta_categorie. " +
+      "Vérifiez que le widget a l'accès complet au document.";
+  }
+}
+
+grist.ready({ requiredAccess: "full" });
+// Le widget recharge tout le document dès que la table à laquelle il est lié change.
+grist.onRecords(scheduleReload);
+loadDocName("Offre data").then(name => {
+  document.getElementById("docTitle").textContent = name;
+  document.title = name;
+});
+reload();
+</script>
+
+</body>
+</html>
