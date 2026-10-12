@@ -36,7 +36,13 @@
     font-size: 1.75rem;
     font-weight: 700;
     line-height: 1.25;
+    cursor: text;
+    outline: none;
   }
+  [data-col] { cursor: text; outline: none; }
+  [data-col]:hover { background: #f0f0ff; }
+  [data-col][contenteditable="true"] { background: none; box-shadow: 0 2px 0 var(--bleu-france); }
+  header.brand h1[contenteditable="true"] { box-shadow: 0 2px 0 var(--bleu-france); }
 
   main { padding: 24px 32px 8px; max-width: 1200px; }
 
@@ -114,7 +120,7 @@
 
 <header class="brand">
   <p class="fr-logo">Gouvernement</p>
-  <h1 id="docTitle">Offre data</h1>
+  <h1 id="docTitle" title="Double-cliquer pour modifier le titre">Offre data</h1>
 </header>
 
 <main>
@@ -127,9 +133,10 @@
 <script>
 function render(groups) {
   const html = groups.map(g => {
-    const eyebrow = g.nom && g.nom !== g.titre ? `<span class="eyebrow">${escapeHtml(g.nom)}</span>` : "";
+    const eyebrow = g.nom && g.nom !== g.titre
+      ? `<span class="eyebrow"${editAttrs("Meta_categorie", g.id, "Nom")}>${escapeHtml(g.nom)}</span>` : "";
     const list = renderCategories(g, "Aucun besoin.");
-    return `<section class="meta"><h2>${eyebrow}${escapeHtml(g.titre)}</h2>${list}</section>`;
+    return `<section class="meta"><h2>${eyebrow}<span${editAttrs("Meta_categorie", g.id, g.titreCol)}>${escapeHtml(g.titre)}</span></h2>${list}</section>`;
   }).join("");
   document.getElementById("groups").innerHTML = html;
   document.getElementById("status").style.display = groups.length ? "none" : "block";
@@ -154,13 +161,52 @@ async function reload() {
   }
 }
 
-grist.ready({ requiredAccess: "full" });
+// Titre : celui saisi dans le widget (option « titre ») s'il existe, sinon le nom du document, sinon « Offre data ».
+const titleEl = document.getElementById("docTitle");
+let customTitle = null;
+let docName = null;
+
+function showTitle() {
+  const t = customTitle || docName || "Offre data";
+  titleEl.textContent = t;
+  document.title = t;
+}
+
+function editTitle() {
+  titleEl.contentEditable = "true";
+  titleEl.focus();
+  document.getSelection().selectAllChildren(titleEl);
+}
+
+async function saveTitle() {
+  if (titleEl.contentEditable !== "true") return;
+  titleEl.contentEditable = "false";
+  const value = titleEl.textContent.trim();
+  customTitle = value && value !== docName ? value : null;
+  showTitle();
+  try {
+    await grist.setOption("titre", customTitle);
+  } catch (e) {
+    console.warn("Impossible d'enregistrer le titre :", e);
+  }
+}
+
+titleEl.addEventListener("dblclick", editTitle);
+titleEl.addEventListener("blur", saveTitle);
+titleEl.addEventListener("keydown", e => {
+  if (e.key === "Enter") { e.preventDefault(); titleEl.blur(); }
+  if (e.key === "Escape") { titleEl.contentEditable = "false"; showTitle(); }
+});
+
+enableInlineEditing(document.getElementById("groups"), scheduleReload);
+grist.ready({ requiredAccess: "full", onEditOptions: editTitle });
+grist.onOptions(options => {
+  customTitle = (options && options.titre) || null;
+  showTitle();
+});
 // Le widget recharge tout le document dès que la table à laquelle il est lié change.
 grist.onRecords(scheduleReload);
-loadDocName("Offre data").then(name => {
-  document.getElementById("docTitle").textContent = name;
-  document.title = name;
-});
+loadDocName(null).then(name => { docName = name; showTitle(); });
 reload();
 </script>
 
