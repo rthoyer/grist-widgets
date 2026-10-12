@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Offre data — slide</title>
+<script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+<link rel="stylesheet" href="../shared/dsfr/marianne.css">
+<script src="../shared/offre-data.js"></script>
+<style>
+  :root {
+    --bleu-france: #000091;
+    --texte: #161616;
+    --texte-doux: #3a3a3a;
+    --ligne: #dddddd;
+    --fond-outil: #f6f6f6;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; background: #fff; }
+  body {
+    margin: 0;
+    font-family: "Marianne", Arial, sans-serif;
+    color: var(--texte);
+    display: flex;
+    flex-direction: column;
+  }
+
+  nav.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--fond-outil);
+    border-bottom: 1px solid var(--ligne);
+    flex-shrink: 0;
+  }
+  nav.toolbar select {
+    flex: 1;
+    min-width: 0;
+    max-width: 480px;
+    font: inherit;
+    font-size: 0.9rem;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+  }
+  nav.toolbar button {
+    font: inherit;
+    font-size: 0.85rem;
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 4px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  nav.toolbar button:disabled { opacity: 0.4; cursor: default; }
+  nav.toolbar button:not(:disabled):hover { background: #eeeeff; }
+  nav.toolbar .position { font-size: 0.85rem; min-width: 44px; text-align: center; }
+  nav.toolbar .build-info { margin-left: auto; font-size: 0.7rem; color: var(--texte-doux); white-space: nowrap; }
+  nav.toolbar .build-info a { color: inherit; text-decoration: none; }
+
+  #stage {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  /* Slide au format 16:9, dessinée à 1280×720 puis mise à l'échelle. */
+  .slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1280px;
+    height: 720px;
+    transform-origin: 0 0;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 64px 48px;
+  }
+  .slide .fr-logo { align-self: flex-start; }
+  .slide .head { margin-top: 36px; }
+  .slide .eyebrow {
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--texte-doux);
+    margin-bottom: 6px;
+  }
+  .slide h1 {
+    margin: 0;
+    font-size: 44px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--bleu-france);
+  }
+  .slide .rule {
+    width: 64px;
+    height: 4px;
+    background: var(--bleu-france);
+    margin: 20px 0 28px;
+  }
+  .slide .content { flex: 1; min-height: 0; overflow: hidden; }
+  .slide ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    column-gap: 56px;
+    column-fill: auto;
+    height: 100%;
+    font-size: var(--list-size, 26px);
+  }
+  .slide li {
+    position: relative;
+    padding: 0.22em 0 0.22em 1.1em;
+    line-height: 1.35;
+    break-inside: avoid;
+  }
+  .slide li::before {
+    content: "";
+    position: absolute;
+    left: 0.1em;
+    top: 0.72em;
+    width: 0.32em;
+    height: 0.32em;
+    background: var(--bleu-france);
+  }
+  .slide .none { font-size: 24px; color: var(--texte-doux); font-style: italic; }
+
+  #status { padding: 24px; color: var(--texte-doux); }
+
+  @media print {
+    @page { size: 1280px 720px; margin: 0; }
+    html, body { height: auto; }
+    nav.toolbar { display: none; }
+    #stage { overflow: visible; }
+    .slide { position: static; transform: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="toolbar">
+  <button id="prevBtn" title="Méta-catégorie précédente (←)">‹</button>
+  <select id="metaSelect" aria-label="Méta-catégorie"></select>
+  <button id="nextBtn" title="Méta-catégorie suivante (→)">›</button>
+  <span class="position" id="position"></span>
+  <span class="build-info"><a href="https://github.com/rthoyer" target="_blank" rel="noopener">@rthoyer</a> — v<span id="version">0</span></span>
+</nav>
+
+<div id="stage">
+  <div id="status">Chargement…</div>
+  <div class="slide" id="slide" style="display:none">
+    <p class="fr-logo fr-logo--lg">République<br>Française</p>
+    <div class="head">
+      <div class="eyebrow" id="eyebrow"></div>
+      <h1 id="title"></h1>
+    </div>
+    <div class="rule"></div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<script>
+const SLIDE_W = 1280, SLIDE_H = 720;
+let groups = [];
+let selectedId = null;
+
+function fitSlide() {
+  const stage = document.getElementById("stage");
+  const slide = document.getElementById("slide");
+  const scale = Math.min(stage.clientWidth / SLIDE_W, stage.clientHeight / SLIDE_H);
+  const x = (stage.clientWidth - SLIDE_W * scale) / 2;
+  const y = (stage.clientHeight - SLIDE_H * scale) / 2;
+  slide.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+}
+
+// Choisit le nombre de colonnes et la taille de police pour que toute la liste tienne dans la slide.
+function fitList() {
+  const content = document.getElementById("content");
+  const ul = content.querySelector("ul");
+  if (!ul) return;
+  const n = ul.children.length;
+  for (const cols of n > 6 ? [2, 3] : [1, 2, 3]) {
+    ul.style.columnCount = cols;
+    for (let size = 28; size >= 14; size -= 1) {
+      ul.style.setProperty("--list-size", size + "px");
+      if (ul.scrollWidth <= content.clientWidth + 1 && ul.scrollHeight <= content.clientHeight + 1) return;
+    }
+  }
+}
+
+function currentIndex() {
+  return groups.findIndex(g => g.id === selectedId);
+}
+
+function select(id) {
+  selectedId = id;
+  render();
+}
+
+function render() {
+  const status = document.getElementById("status");
+  const slide = document.getElementById("slide");
+  const sel = document.getElementById("metaSelect");
+
+  sel.innerHTML = groups.map(g => `<option value="${g.id}">${escapeHtml(g.nom || g.titre)}</option>`).join("");
+  if (!groups.length) {
+    status.style.display = "block";
+    status.textContent = "Aucune méta-catégorie.";
+    slide.style.display = "none";
+    return;
+  }
+  if (currentIndex() === -1) selectedId = groups[0].id;
+  const idx = currentIndex();
+  const g = groups[idx];
+  sel.value = String(g.id);
+
+  status.style.display = "none";
+  slide.style.display = "flex";
+  document.getElementById("eyebrow").textContent = g.nom && g.nom !== g.titre ? g.nom : "";
+  document.getElementById("title").textContent = g.titre;
+  document.getElementById("content").innerHTML = g.besoins.length
+    ? `<ul>${g.besoins.map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>`
+    : `<p class="none">Aucun besoin pour cette méta-catégorie.</p>`;
+
+  document.getElementById("prevBtn").disabled = idx <= 0;
+  document.getElementById("nextBtn").disabled = idx >= groups.length - 1;
+  document.getElementById("position").textContent = `${idx + 1} / ${groups.length}`;
+
+  fitSlide();
+  fitList();
+}
+
+function step(delta) {
+  const idx = currentIndex() + delta;
+  if (idx >= 0 && idx < groups.length) select(groups[idx].id);
+}
+
+document.getElementById("metaSelect").addEventListener("change", e => select(Number(e.target.value)));
+document.getElementById("prevBtn").addEventListener("click", () => step(-1));
+document.getElementById("nextBtn").addEventListener("click", () => step(1));
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "SELECT") return;
+  if (e.key === "ArrowLeft" || e.key === "PageUp") step(-1);
+  if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") step(1);
+});
+window.addEventListener("resize", fitSlide);
+if (document.fonts) document.fonts.ready.then(() => { fitSlide(); fitList(); });
+
+let reloadTimer = null;
+function scheduleReload() {
+  clearTimeout(reloadTimer);
+  reloadTimer = setTimeout(reload, 150);
+}
+
+async function reload() {
+  try {
+    groups = await loadOffreData();
+    render();
+  } catch (e) {
+    console.error(e);
+    const status = document.getElementById("status");
+    status.style.display = "block";
+    status.textContent = "Impossible de lire les tables Besoin / Categories / Meta_categorie. " +
+      "Vérifiez que le widget a l'accès complet au document.";
+  }
+}
+
+grist.ready({ requiredAccess: "full" });
+grist.onRecords(scheduleReload);
+// Lié à la table Meta_categorie, le widget suit la ligne sélectionnée.
+grist.onRecord(record => {
+  if (record && "Nom" in record && "Titre" in record) select(record.id);
+});
+reload();
+</script>
+
+</body>
+</html>

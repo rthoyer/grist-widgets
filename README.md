@@ -28,6 +28,30 @@ prévisionnel (montant global + détail).
 **Custom URL**, pointer vers `fiche-projet-ecole-ouverte/index.html`, et autoriser l'accès complet au
 document (nécessaire pour résoudre les références vers la table `Sessions`).
 
+## offre-data-besoins
+
+Liste des besoins du document « Offre data », regroupés par méta-catégorie (tables `Besoin`,
+`Categories`, `Meta_categorie`). Fond blanc, bloc-marque « République Française » en haut à gauche,
+titre = nom du document Grist, police Marianne. Dans chaque méta-catégorie, les besoins suivent
+l'ordre des catégories puis l'ordre des lignes ; les besoins sans catégorie sont listés dans « Autres besoins ».
+
+**Utilisation dans Grist** : ajouter un widget **Custom URL** pointant vers `offre-data-besoins/index.html`,
+le lier de préférence à la table `Besoin` (il se rafraîchit à chaque modification de cette table), et
+autoriser l'accès complet au document.
+
+## offre-data-slide
+
+Une « slide » 16:9 par méta-catégorie : bloc-marque en haut à gauche, titre de la méta-catégorie, liste des
+besoins (taille de police et nombre de colonnes ajustés automatiquement pour que tout tienne). La
+méta-catégorie se choisit dans la liste déroulante, avec les boutons ‹ › ou les flèches du clavier.
+Imprimable (une page au format slide).
+
+**Utilisation dans Grist** : widget **Custom URL** vers `offre-data-slide/index.html`, accès complet au
+document. S'il est lié à la table `Meta_categorie`, la slide suit la ligne sélectionnée.
+
+Les deux widgets partagent `shared/` : la police Marianne et le bloc-marque extraits du
+[DSFR](https://github.com/GouvernementFR/dsfr) (`shared/dsfr/`), et le chargement des données (`shared/offre-data.js`).
+
 ## Déploiement (GitHub Pages)
 
 Le déploiement passe par une GitHub Action (`.github/workflows/deploy-pages.yml`) déclenchée à chaque
